@@ -139,7 +139,7 @@ def write_tag_html( tag, posts, end_text ):
 	f.write("</ul>\n")
 	generate_html_end( f, end_text )
 	f.close()
-	
+
 def generate_next_prev_links( f, path_depth, link_prev, link_next ):
 	if( len( link_prev ) > 0 or len( link_next ) > 0 ):
 		upbuffer = "../" * path_depth
@@ -156,10 +156,11 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 	f.write('<div class="post">')
 	f.write('<h1 class="title"><a href=\"'+upbuffer+post.path()+"\">" + post.title + "</a></h1>\n" )
 	f.write('<h4 class="post_date"> Written '+str(post.dt.date())+"</h4>\n" )
-	f.write('<h4 class="tag_list"> Tags:')
-	for tag in post.tags:
-		f.write( "<a href=\"" + upbuffer + TAG_PATH_BASE + tag + ".html" +"\">" + tag + "</a>&nbsp;" )
-	f.write("</h4>\n")
+	if( post.tags ):
+		f.write('<h4 class="tag_list"> Tags:')
+		for tag in post.tags:
+			f.write( "<a href=\"" + upbuffer + TAG_PATH_BASE + tag + ".html" +"\">" + tag + "</a>&nbsp;" )
+		f.write("</h4>\n")
 	generate_next_prev_links( f, path_depth, link_prev, link_next )
 	f.write('<div class="body_text">')
 	f.write(post.text)
