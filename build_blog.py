@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import fileinput
+import fnmatch
 import glob
 import shutil
 from pyatom import AtomFeed
@@ -103,11 +104,13 @@ def generate_html_start( f, title, path_depth ):
 
 def parse_inc_directory( dir ):
 	the_text = ""
-	for infile in glob.glob( os.path.join( dir, '*.inc') ):
-		print "Parsing: " + infile
-		f = open( infile )
-		the_text += f.read()
-		f.close()
+	for root, dirnames, filenames in os.walk(dir):
+		for filename in fnmatch.filter(filenames, '*.inc'):
+			infile = os.path.join( root, filename )
+			print "Parsing: " + infile
+			f = open( infile )
+			the_text += f.read()
+			f.close()
 	return the_text
 
 
@@ -197,9 +200,11 @@ def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	f.close()
 
 posts = []
-for infile in glob.glob( os.path.join(INPUT_POST_PATH, '*.blagr') ):
-	print "Parsing: " + infile
-	posts.append( parse_blagr_entry( infile ) )
+for root, dirnames, filenames in os.walk(INPUT_POST_PATH):
+	for filename in fnmatch.filter(filenames, '*.blagr'):
+		infile = os.path.join( root, filename )
+		print "Parsing: " + infile
+		posts.append( parse_blagr_entry( infile ) )
 posts.sort()
 
 shutil.rmtree(PATH_BASE,True)
