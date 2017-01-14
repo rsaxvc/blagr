@@ -174,12 +174,16 @@ def write_line_link_to_post( f, post, path_depth ):
 	upbuffer = "../"*path_depth;
 	f.write( "<li><a href=\""+upbuffer+post.path()+"\">"+post.title+"</a></li>" )
 
+def my_open( filename, mode ):
+	if not os.path.exists( os.path.dirname( filename ) ):
+		os.makedirs( os.path.dirname( filename ) )
+	f = open(filename, mode)
+	return f
+
 def write_tag_html( tag, posts, end_text ):
 	"makes the file and writes the text for a tag page"
 	filename = TAG_PATH_BASE + tag + ".html"
-	if( os.path.exists( os.path.dirname( filename ) ) == False ):
-		os.makedirs( os.path.dirname( filename ) )
-	f = open(filename, 'w')
+	f = my_open(filename, 'w')
 	generate_html_start( f, "Tag listing for " + tag, 1 )
 	f.write( "<h4>Posts tagged with " + tag + "</h4>\n" )
 	f.write( "<ul>\n" )
@@ -221,18 +225,14 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 def write_post( post, end_text, link_prev, link_next ):
 	"makes the file and writes the text for a post"
 	filename = post.path()
-	if( os.path.exists( os.path.dirname( filename ) ) == False ):
-		os.makedirs( os.path.dirname( filename ) )
-	f = open( filename, 'w' )
+	f = my_open( filename, 'w' )
 	generate_html_start( f, post.title, 3 )
 	generate_post_html( f, post, 3, link_prev, link_next )
 	generate_html_end( f, end_text )
 	f.close()
 	for path in post.oldpaths():
 		print "Redirecting "+path+" to " + post.relpath()
-		if( os.path.exists( os.path.dirname( path ) ) == False ):
-			os.makedirs( os.path.dirname( path ) )
-		f = open( path, 'w' )
+		f = my_open( path, 'w' )
 		generate_html_redirect( f, post.relpath(), 3 )
 		f.close()
 
