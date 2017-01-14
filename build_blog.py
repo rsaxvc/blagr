@@ -225,6 +225,8 @@ for root, dirnames, filenames in os.walk(INPUT_POST_PATH):
 		posts.append( parse_blagr_entry( infile ) )
 posts.sort()
 
+posts = filter_posts( posts )
+
 shutil.rmtree(PATH_BASE,True)
 
 end_text = parse_inc_directory( INPUT_INC_TAIL_PATH )
@@ -241,8 +243,6 @@ for i in range( len( posts ) ):
 index_posts = posts[:POSTS_PER_PAGE]
 archive_posts = posts[POSTS_PER_PAGE:]
 write_posts( POST_PATH_BASE + "index.html", BLOG_TITLE, index_posts, archive_posts, end_text )
-
-posts = filter_posts( posts )
 
 tags = globulate_tags( posts )
 tags.sort()
