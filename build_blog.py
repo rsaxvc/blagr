@@ -50,7 +50,8 @@ class post:
 			'\'' : '',
 			'\\' : '',
 			'/'  : '',
-			'.'  : ''
+			'.'  : '',
+			'?'  : ''
 			}
 		for char in input:
 			if char in conversion:
