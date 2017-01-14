@@ -36,15 +36,15 @@ class post:
 	text = ""
 	dt = ""
 	def __cmp__(self, other):
-		if( self.dt < other.dt ):
+		if( self.cdt < other.cdt ):
 			return 1
-		elif( self.dt == other.dt ):
+		elif( self.cdt == other.cdt ):
 			return 0
 		else:
 			return -1
 
 	def relpath(self):
-		return str(self.dt.year) + "/" + str(self.dt.month) + "/" + str(self.dt.day) + "/" + str(self.title) + ".html"
+		return str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + str(self.title) + ".html"
 
 	def path(self):
 		return POST_PATH_BASE + self.relpath()
@@ -75,11 +75,19 @@ def parse_blagr_entry( filename ):
 				elif( chunk == "Author" ):
 					p.author = text
 				elif( chunk == "CreatedDateTime" ):
-					p.dt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+					p.cdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+				elif( chunk == "ModifiedDateTime" ):
+					p.mdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+				elif( chunk == "PublishedDateTime" ):
+					p.pdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
 				elif( chunk == "Title" ):
 					p.title = text
 		else:
 			p.text += line
+	if( not hasattr(p, 'mdt') ):
+		p.mdt = p.cdt
+	if( not hasattr(p, 'pdt') ):
+		p.pdt = p.cdt
 	return p
 
 def globulate_tags( posts ):
@@ -155,7 +163,7 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 	upbuffer = "../" * path_depth
 	f.write('<div class="post">')
 	f.write('<h1 class="title"><a href=\"'+upbuffer+post.path()+"\">" + post.title + "</a></h1>\n" )
-	f.write('<h4 class="post_date"> Written '+str(post.dt.date())+"</h4>\n" )
+	f.write('<h4 class="post_date"> Written '+str(post.cdt.date())+"</h4>\n" )
 	if( post.tags ):
 		f.write('<h4 class="tag_list"> Tags:')
 		for tag in post.tags:
@@ -200,6 +208,14 @@ def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	generate_html_end( f, end_text )
 	f.close()
 
+def filter_posts( input ):
+	"""Remove posts not ready for publishing"""
+	output = []
+	for post in input:
+		if( post.pdt < datetime.now() ):
+			output.append( post )
+	return output
+
 posts = []
 for root, dirnames, filenames in os.walk(INPUT_POST_PATH):
 	for filename in fnmatch.filter(filenames, '*.blagr'):
@@ -225,6 +241,7 @@ index_posts = posts[:POSTS_PER_PAGE]
 archive_posts = posts[POSTS_PER_PAGE:]
 write_posts( POST_PATH_BASE + "index.html", BLOG_TITLE, index_posts, archive_posts, end_text )
 
+posts = filter_posts( posts )
 
 tags = globulate_tags( posts )
 tags.sort()
@@ -243,7 +260,7 @@ for post in posts:
 		content_type="html",
 		author=post.author,
 		url=post.wobpath(),
-		updated=post.dt
+		updated=post.cdt
 		)
 
 f = open(ATOM_PATH, 'w')
