@@ -198,14 +198,15 @@ def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	for post in full_text_posts:
 		generate_post_html( f, post, 0, "", "" )
 
-	#write archive links
-	f.write('<h1 class="title">Older</h1>\n' )
-	f.write("<ul>\n");
-	for post in archive_posts:
-		write_line_link_to_post( f, post, 0 )
-		pass
-	f.write("</ul>\n");
-	generate_html_end( f, end_text )
+	if( archive_posts ):
+		#write archive links
+		f.write('<h1 class="title">Older</h1>\n' )
+		f.write("<ul>\n");
+		for post in archive_posts:
+			write_line_link_to_post( f, post, 0 )
+			pass
+		f.write("</ul>\n");
+		generate_html_end( f, end_text )
 	f.close()
 
 def filter_posts( input ):
