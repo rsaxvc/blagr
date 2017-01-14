@@ -10,8 +10,8 @@ from datetime import datetime
 #configuration
 BLOG_TITLE      = "RSAXVC Development"
 BLOG_SUBTITLE   = "Software, Hardware, Radios, Algorithms"
-BLOG_FEED_URL   = "http://rsaxvc.net/blog/atom.xml"
-BLOG_URL        = "http://rsaxvc.net/blog/"
+BLOG_FEED_URL   = "https://rsaxvc.net/blog/atom.xml"
+BLOG_URL        = "https://rsaxvc.net/blog/"
 BLOG_AUTHOR     = "rsaxvc"
 
 PATH_BASE       = "../blog/"
