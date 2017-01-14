@@ -43,11 +43,36 @@ class post:
 		else:
 			return -1
 
+	def filter_URL( self, input ):
+		output = ""
+		conversion = {
+			' '  : '_',
+			'\'' : '',
+			'\\' : '',
+			'/'  : '',
+			'.'  : ''
+			}
+		for char in input:
+			if char in conversion:
+				output += conversion[char]
+			else:
+				output += char
+		return output
+
 	def relpath(self):
-		return str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + str(self.title) + ".html"
+		#When updating this, make sure to add a new entry
+		#under oldpaths to add a new redirect.
+		return str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + self.filter_URL( str(self.title) )+ ".html"
 
 	def path(self):
+		#When updating this, make sure to add a new entry
+		#under oldpaths to add a new redirect.
 		return POST_PATH_BASE + self.relpath()
+
+	def oldpaths(self):
+		def path0(self):
+			return POST_PATH_BASE + str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + str(self.title) + ".html"
+		return [path0(self)]
 
 	def wobpath(self):
 		return BLOG_URL + self.relpath()
@@ -98,6 +123,23 @@ def globulate_tags( posts ):
 			if tag not in tags:
 				tags.add( tag )
 	return list(tags)
+
+def generate_html_redirect( f, moved_to, path_depth ):
+	"Writes an html meta redirect"
+	target = ( "../" * path_depth ) + moved_to
+	f.write( '<html xmlns="http://www.w3.org/1999/xhtml"\n' )
+	f.write( '<head>\n')
+	f.write( '\t<title>Page Moved</title>\n')
+	f.write( '\t<meta http-equiv="refresh" content="0;URL=\'')
+	f.write( target )
+	f.write( '\'" />\n')
+	f.write( '</head>\n')
+	f.write( '<body>\n')
+	f.write( '\t<a href="' + target + '">\n')
+	f.write( '\t<p>This page has moved. Click here if your browser does not support redirection</p>\n')
+	f.write( '\t</a>\n' )
+	f.write( '</body>\n' )
+	f.write( '</html>\n' )
 
 def generate_html_start( f, title, path_depth ):
 	"Writes common header/title/css-includes/..."
@@ -186,6 +228,13 @@ def write_post( post, end_text, link_prev, link_next ):
 	generate_post_html( f, post, 3, link_prev, link_next )
 	generate_html_end( f, end_text )
 	f.close()
+	for path in post.oldpaths():
+		print "Redirecting "+path+" to " + post.relpath()
+		if( os.path.exists( os.path.dirname( path ) ) == False ):
+			os.makedirs( os.path.dirname( path ) )
+		f = open( path, 'w' )
+		generate_html_redirect( f, post.relpath(), 3 )
+		f.close()
 
 def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	"writes all the posts"
