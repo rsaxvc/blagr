@@ -319,3 +319,6 @@ f.write( feed.to_string() )
 f.close()
 
 shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
+os.system("find " + PATH_BASE + " -name \"*.html\" -exec gzip -9fk {} +")
+os.system("find " + PATH_BASE + " -name \"*.css\" -exec gzip -9fk {} +")
+os.system("find " + PATH_BASE + " -name \"*.xml\" -exec gzip -9fk {} +")
