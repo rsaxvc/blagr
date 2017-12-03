@@ -225,17 +225,16 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 
 def write_post( post, end_text, link_prev, link_next ):
 	"makes the file and writes the text for a post"
-	filename = post.path()
-	f = my_open( filename, 'w' )
-	generate_html_start( f, post.title, 3 )
-	generate_post_html( f, post, 3, link_prev, link_next )
-	generate_html_end( f, end_text )
-	f.close()
 	for path in post.oldpaths():
 		print "Redirecting "+path+" to " + post.relpath()
 		f = my_open( path, 'w' )
 		generate_html_redirect( f, post.relpath(), 3 )
 		f.close()
+	f = my_open( post.path(), 'w' )
+	generate_html_start( f, post.title, 3 )
+	generate_post_html( f, post, 3, link_prev, link_next )
+	generate_html_end( f, end_text )
+	f.close()
 
 def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	"writes all the posts"
