@@ -4,7 +4,12 @@ import fileinput
 import fnmatch
 import glob
 import shutil
-from pyatom import AtomFeed
+pyatom_present = True
+try:
+	from pyatom import AtomFeed
+except:
+	pyatom_present = False
+	print("pyatom not present or other import error, continuing. ATOM support disabled")
 from datetime import datetime
 
 #configuration
@@ -298,24 +303,25 @@ tags.sort()
 for tag in tags:
 	write_tag_html( tag, posts, end_text )
 
-feed = AtomFeed(title=BLOG_TITLE,
-	subtitle=BLOG_SUBTITLE,
-	feed_url=BLOG_FEED_URL,
-	url=BLOG_URL,
-	author=BLOG_AUTHOR)
+if pyatom_present:
+	feed = AtomFeed(title=BLOG_TITLE,
+		subtitle=BLOG_SUBTITLE,
+		feed_url=BLOG_FEED_URL,
+		url=BLOG_URL,
+		author=BLOG_AUTHOR)
 
-for post in posts:
-	feed.add(title=post.title,
-		content=post.text,
-		content_type="html",
-		author=post.author,
-		url=post.wobpath(),
-		updated=post.cdt
-		)
+	for post in posts:
+		feed.add(title=post.title,
+			content=post.text,
+			content_type="html",
+			author=post.author,
+			url=post.wobpath(),
+			updated=post.cdt
+			)
 
-f = open(ATOM_PATH, 'w')
-f.write( feed.to_string() )
-f.close()
+	f = open(ATOM_PATH, 'w')
+	f.write( feed.to_string() )
+	f.close()
 
 shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
 os.system("find " + PATH_BASE + " -name \"*.html\" -exec gzip -9fk {} +")
