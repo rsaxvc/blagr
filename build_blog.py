@@ -41,9 +41,9 @@ class post:
 	text = ""
 	dt = ""
 	def __cmp__(self, other):
-		if( self.cdt < other.cdt ):
+		if( self.pdt < other.pdt ):
 			return 1
-		elif( self.cdt == other.cdt ):
+		elif( self.pdt == other.pdt ):
 			return 0
 		else:
 			return -1
