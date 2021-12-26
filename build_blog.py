@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import codecs
 import fileinput
 import fnmatch
 import glob
@@ -95,7 +96,7 @@ def parse_blagr_entry( filename ):
 	p = post()
 	p.tags = set()
 	post_sep_found = False
-	for line in fileinput.input(filename):
+	for line in fileinput.FileInput(filename,openhook=fileinput.hook_encoded('utf-8')):
 		if( post_sep_found == False ):
 			if( line == "---\n" ):
 				post_sep_found = True
@@ -180,16 +181,15 @@ def write_line_link_to_post( f, post, path_depth ):
 	upbuffer = "../"*path_depth;
 	f.write( "<li><a href=\""+upbuffer+post.path()+"\">"+post.title+"</a></li>" )
 
-def my_open( filename, mode ):
+def my_open( filename, mode, encoding ):
 	if not os.path.exists( os.path.dirname( filename ) ):
 		os.makedirs( os.path.dirname( filename ) )
-	f = open(filename, mode)
-	return f
+	return codecs.open(filename, mode, encoding=encoding)
 
 def write_tag_html( tag, posts, end_text ):
 	"makes the file and writes the text for a tag page"
 	filename = TAG_PATH_BASE + tag + ".html"
-	f = my_open(filename, 'w')
+	f = my_open(filename, 'w', 'utf-8')
 	generate_html_start( f, "Tag listing for " + tag, 1 )
 	f.write( "<h4>Posts tagged with " + tag + "</h4>\n" )
 	f.write( "<ul>\n" )
@@ -232,10 +232,10 @@ def write_post( post, end_text, link_prev, link_next ):
 	"makes the file and writes the text for a post"
 	for path in post.oldpaths():
 		print "Redirecting "+path+" to " + post.relpath()
-		f = my_open( path, 'w' )
+		f = my_open( path, 'w', 'utf-8' )
 		generate_html_redirect( f, post.relpath(), 3 )
 		f.close()
-	f = my_open( post.path(), 'w' )
+	f = my_open( post.path(), 'w', 'utf-8' )
 	generate_html_start( f, post.title, 3 )
 	generate_post_html( f, post, 3, link_prev, link_next )
 	generate_html_end( f, end_text )
@@ -243,9 +243,7 @@ def write_post( post, end_text, link_prev, link_next ):
 
 def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 	"writes all the posts"
-	if( os.path.exists( os.path.dirname( filename ) ) == False ):
-		os.makedirs( os.path.dirname( filename ) )
-	f = open( filename, 'w' )
+	f = my_open( filename, 'w', 'utf-8' )
 	generate_html_start( f, title, 0 )
 
 	#write frontpage posts
@@ -303,6 +301,8 @@ tags.sort()
 for tag in tags:
 	write_tag_html( tag, posts, end_text )
 
+shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
+
 if pyatom_present:
 	feed = AtomFeed(title=BLOG_TITLE,
 		subtitle=BLOG_SUBTITLE,
@@ -319,8 +319,6 @@ if pyatom_present:
 			updated=post.cdt
 			)
 
-	f = open(ATOM_PATH, 'w')
+	f = my_open(ATOM_PATH, 'w', 'utf-8')
 	f.write( feed.to_string() )
 	f.close()
-
-shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
