@@ -57,7 +57,26 @@ class post:
 			'\\' : '',
 			'/'  : '',
 			'.'  : '',
-			'?'  : ''
+			'?'  : '',
+			':'  : '',
+			'>'  : '',
+			}
+		for char in input:
+			if char in conversion:
+				output += conversion[char]
+			else:
+				output += char
+		return output
+
+	def filter_NTFS( self, input ):
+		output = ""
+		conversion = {
+			'\'' : '',
+			'\\' : '',
+			'/'  : '',
+			'?'  : '',
+			':'  : '',
+			'>'  : '',
 			}
 		for char in input:
 			if char in conversion:
@@ -78,7 +97,7 @@ class post:
 
 	def oldpaths(self):
 		def path0(self):
-			return POST_PATH_BASE + str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + str(self.title) + ".html"
+			return POST_PATH_BASE + str(self.cdt.year) + "/" + str(self.cdt.month) + "/" + str(self.cdt.day) + "/" + self.filter_NTFS(str(self.title)) + ".html"
 		return [path0(self)]
 
 	def wobpath(self):
@@ -89,7 +108,7 @@ def parse_blagr_tophalf_line( line ):
 	if( len(last) == 0 or len(sep) == 0 ):
 		print "error parsing file:",first
 	else:
-		return (first,last.rstrip("\n"))
+		return (first,last.rstrip())
 
 def parse_blagr_entry( filename ):
 	"parse a blagr entry file into a structure"
@@ -98,7 +117,7 @@ def parse_blagr_entry( filename ):
 	post_sep_found = False
 	for line in fileinput.FileInput(filename,openhook=fileinput.hook_encoded('utf-8')):
 		if( post_sep_found == False ):
-			if( line == "---\n" ):
+			if( line.rstrip() == "---" ):
 				post_sep_found = True
 			else:
 				(chunk,text) = parse_blagr_tophalf_line( line )
@@ -114,6 +133,8 @@ def parse_blagr_entry( filename ):
 					p.pdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
 				elif( chunk == "Title" ):
 					p.title = text
+				else:
+					print "unknown chunk type:", chunk, text
 		else:
 			p.text += line
 	if( not hasattr(p, 'mdt') ):
@@ -231,7 +252,7 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 def write_post( post, end_text, link_prev, link_next ):
 	"makes the file and writes the text for a post"
 	for path in post.oldpaths():
-		print "Redirecting "+path+" to " + post.relpath()
+		print "Redirecting " + path + " to " + post.relpath()
 		f = my_open( path, 'w', 'utf-8' )
 		generate_html_redirect( f, post.relpath(), 3 )
 		f.close()
