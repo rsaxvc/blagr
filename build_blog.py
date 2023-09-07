@@ -106,7 +106,7 @@ class post:
 def parse_blagr_tophalf_line( line ):
 	(first,sep,last) = line.partition(':')
 	if( len(last) == 0 or len(sep) == 0 ):
-		print "error parsing file:",first
+		print ("error parsing file:",first)
 	else:
 		return (first,last.rstrip())
 
@@ -134,7 +134,7 @@ def parse_blagr_entry( filename ):
 				elif( chunk == "Title" ):
 					p.title = text
 				else:
-					print "unknown chunk type:", chunk, text
+					print ("unknown chunk type:", chunk, text)
 		else:
 			p.text += line
 	if( not hasattr(p, 'mdt') ):
@@ -185,7 +185,7 @@ def parse_inc_directory( dir ):
 	for root, dirnames, filenames in os.walk(dir):
 		for filename in fnmatch.filter(filenames, '*.inc'):
 			infile = os.path.join( root, filename )
-			print "Parsing: " + infile
+			print ("Parsing: " + infile)
 			f = open( infile )
 			the_text += f.read()
 			f.close()
@@ -252,7 +252,7 @@ def generate_post_html( f, post, path_depth, link_prev, link_next ):
 def write_post( post, end_text, link_prev, link_next ):
 	"makes the file and writes the text for a post"
 	for path in post.oldpaths():
-		print "Redirecting " + path + " to " + post.relpath()
+		print ("Redirecting " + path + " to " + post.relpath())
 		f = my_open( path, 'w', 'utf-8' )
 		generate_html_redirect( f, post.relpath(), 3 )
 		f.close()
@@ -294,7 +294,7 @@ posts = []
 for root, dirnames, filenames in os.walk(INPUT_POST_PATH):
 	for filename in fnmatch.filter(filenames, '*.blagr'):
 		infile = os.path.join( root, filename )
-		print "Parsing: " + infile
+		print ("Parsing: " + infile)
 		posts.append( parse_blagr_entry( infile ) )
 posts.sort()
 
