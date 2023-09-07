@@ -49,6 +49,12 @@ class post:
 		else:
 			return -1
 
+	def __lt__(self, other):
+		if( self.pdt < other.pdt ):
+			return False
+		else:
+			return True
+
 	def filter_URL( self, input ):
 		output = ""
 		conversion = {
