@@ -183,7 +183,7 @@ def generate_html_start( f, title, path_depth ):
 	f.write( "<head>\n" )
 	f.write( "<meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\" />\n")
 	f.write( "<title>"+title+"</title>\n")
-	f.write( '<LINK href="' + upbuffer + CSS_PATH_BASE + 'blog.css" rel="stylesheet" type="text/css" />')
+	f.write( '<link href="' + upbuffer + CSS_PATH_BASE + 'blog.css" rel="stylesheet" type="text/css" />')
 	f.write( "</head><body>\n" )
 
 def parse_inc_directory( dir ):
