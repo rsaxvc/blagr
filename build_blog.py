@@ -335,11 +335,12 @@ shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
 if feedgen_present:
 	feed = FeedGenerator()
 	feed.author({'name':BLOG_AUTHOR})
-	feed.link(href='BLOG_URL')
+	feed.link(href=BLOG_URL)
 	feed.title(BLOG_TITLE)
 	feed.subtitle(BLOG_SUBTITLE)
 
-	for post in posts:
+	for post in posts[0:10]:
+		print(post.title)
 		entry = feed.add_entry()
 		entry.title(post.title)
 		entry.author({'name':post.author})
@@ -347,11 +348,6 @@ if feedgen_present:
 		entry.link(href=post.wobpath())
 		entry.updated(post.cdt)
 		#entry.content(post.text)
-		#feed.add(title=post.title,
-		#	content=post.text,
-		#	content_type="html",
-		#	updated=post.cdt
-		#	)
 
 	f = my_open(RSS_PATH, 'w', 'utf-8')
 	f.close()
