@@ -5,13 +5,13 @@ import fileinput
 import fnmatch
 import glob
 import shutil
-pyatom_present = True
+feedgen_present = True
 try:
-	from pyatom import AtomFeed
+	from feedgen.feed import FeedGenerator
 except:
-	pyatom_present = False
-	print("pyatom not present or other import error, continuing. ATOM support disabled")
-from datetime import datetime
+	feedgen_present = False
+	print("feedgen not present or other import error, continuing. ATOM/RSS support disabled")
+from datetime import datetime, timezone
 
 #configuration
 BLOG_TITLE      = "RSAXVC Development"
@@ -25,6 +25,7 @@ POST_PATH_BASE  = PATH_BASE
 TAG_PATH_BASE   = PATH_BASE + "tags/"
 CSS_PATH_BASE   = PATH_BASE + "css/"
 ATOM_PATH		= PATH_BASE + "atom.xml"
+RSS_PATH		= PATH_BASE + "rss.xml"
 PAGE_PATH_BASE	= PATH_BASE + "pages/"
 
 POSTS_PER_PAGE	= 3
@@ -132,11 +133,11 @@ def parse_blagr_entry( filename ):
 				elif( chunk == "Author" ):
 					p.author = text
 				elif( chunk == "CreatedDateTime" ):
-					p.cdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+					p.cdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" ).replace(tzinfo=timezone.utc)
 				elif( chunk == "ModifiedDateTime" ):
-					p.mdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+					p.mdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" ).replace(tzinfo=timezone.utc)
 				elif( chunk == "PublishedDateTime" ):
-					p.pdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" )
+					p.pdt = datetime.strptime( text, "%Y-%m-%dT%H:%M:%S" ).replace(tzinfo=timezone.utc)
 				elif( chunk == "Title" ):
 					p.title = text
 				else:
@@ -290,9 +291,10 @@ def write_posts( filename, title, full_text_posts, archive_posts, end_text ):
 
 def filter_posts( input ):
 	"""Remove posts not ready for publishing"""
+	dt_utc = datetime.now().replace(tzinfo=timezone.utc)
 	output = []
 	for post in input:
-		if( post.pdt < datetime.now() ):
+		if( post.pdt < dt_utc ):
 			output.append( post )
 	return output
 
@@ -330,22 +332,30 @@ for tag in tags:
 
 shutil.copytree( INPUT_CSS_PATH, CSS_PATH_BASE )
 
-if pyatom_present:
-	feed = AtomFeed(title=BLOG_TITLE,
-		subtitle=BLOG_SUBTITLE,
-		feed_url=BLOG_FEED_URL,
-		url=BLOG_URL,
-		author=BLOG_AUTHOR)
+if feedgen_present:
+	feed = FeedGenerator()
+	feed.author({'name':BLOG_AUTHOR})
+	feed.link(href='BLOG_URL')
+	feed.title(BLOG_TITLE)
+	feed.subtitle(BLOG_SUBTITLE)
 
 	for post in posts:
-		feed.add(title=post.title,
-			content=post.text,
-			content_type="html",
-			author=post.author,
-			url=post.wobpath(),
-			updated=post.cdt
-			)
+		entry = feed.add_entry()
+		entry.title(post.title)
+		entry.author({'name':post.author})
+		entry.id(post.wobpath())
+		entry.link(href=post.wobpath())
+		entry.updated(post.cdt)
+		#entry.content(post.text)
+		#feed.add(title=post.title,
+		#	content=post.text,
+		#	content_type="html",
+		#	updated=post.cdt
+		#	)
 
-	f = my_open(ATOM_PATH, 'w', 'utf-8')
-	f.write( feed.to_string() )
+	f = my_open(RSS_PATH, 'w', 'utf-8')
 	f.close()
+	feed.rss_file(RSS_PATH)
+	#f = my_open(ATOM_PATH, 'w', 'utf-8')
+	#f.write(feed.atom_str(pretty=False))
+	#f.close()
