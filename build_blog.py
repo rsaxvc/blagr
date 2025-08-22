@@ -339,7 +339,7 @@ if feedgen_present:
 	feed.title(BLOG_TITLE)
 	feed.subtitle(BLOG_SUBTITLE)
 
-	for post in posts[0:10]:
+	for post in reversed(posts[0:10]):
 		print(post.title)
 		entry = feed.add_entry()
 		entry.title(post.title)
